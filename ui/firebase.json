@@ -18,6 +18,9 @@
     ],
     "rewrites": [
       {
+        "source": "/hello", "function": "helloWorld"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
