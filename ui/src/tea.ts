@@ -1,13 +1,10 @@
 import {TemplateResult, TemplateInstance, TemplatePart, Part, getValue} from 'lit-html';
 import {render, extendedPartCallback} from 'lit-html/lib/lit-extended';
 
-export {TemplateResult} from 'lit-html';
-// export {html} from 'lit-html/lib/lit-extended';
-
 export interface Program<Msg, Model> {
   model: Model;
   update: (msg: Msg, model: Model) => Model;
-  view: (model: Model) => TemplateResult;
+  view: (model: Model) => TeaTemplateResult<Msg>;
 }
 
 export function run<Msg, Model>(program: Program<Msg, Model>, mnt: HTMLElement | null): (m: Msg) => void {
@@ -22,13 +19,12 @@ export function run<Msg, Model>(program: Program<Msg, Model>, mnt: HTMLElement |
   return u;
 }
 
-export type Value<Msg> = string | number | TemplateResult | Msg;
+export type Value<Msg> = string | number | TeaTemplateResult<Msg> | Msg;
 
-export function makeTea<Msg>(): (strings: TemplateStringsArray, ...values: Value<Msg>[]) => TemplateResult {
-  return html;
+export class TeaTemplateResult<Msg> extends TemplateResult {
 }
 
-export function html<Msg>(strings: TemplateStringsArray, ...values: Value<Msg>[]): TemplateResult {
+export function html<Msg>(strings: TemplateStringsArray, ...values: Value<Msg>[]): TeaTemplateResult<Msg> {
     return new TemplateResult(strings, values, 'html', teaExtendedPartCallback);
 }
 
@@ -65,7 +61,7 @@ export class EventPart implements Part {
     }
 
     const previousListener = this._listener;
-    const listener = () => { console.log("xxx") };
+    const listener = () => { console.log("will send", msg, this.instance); };
     this._listener = listener;
 
     if (previousListener != null) {

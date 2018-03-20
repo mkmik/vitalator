@@ -1,4 +1,4 @@
-import {Program, TemplateResult, run, html, Value, makeTea} from './tea';
+import {Program, run, html} from './tea';
 
 interface Inc { kind: "Inc" }
 interface Dec { kind: "Dec" }
@@ -18,9 +18,7 @@ function update(msg: Msg, model: number): number {
 let banner = html`<em>ok</em>`;
 let txt = "answer";
 
-const tea = makeTea<Msg>();
-
-let view = (s: number) => tea`<p>
+let view = (s: number) => html`<p>
   The ${txt} is <b>${s}</b>
   <button on-click=${ { kind: "Inc" } }>inc</button>
   <button on-click=${ { kind: "Dec" } }>dec</button>
@@ -33,4 +31,4 @@ let main: Program<Msg, number> = {
   view: view,
 }
 
-let act = run(main, document.getElementById("root"));
+run(main, document.getElementById("root"));
