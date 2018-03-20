@@ -1,20 +1,29 @@
-import {html, render, TemplateResult} from 'lit-html';
+import {Program, TemplateResult, run, html} from './tea';
 
-const x: number = 42;
-const message: string = `Hello ${x} x`;
+interface Inc { kind: "Inc" }
+interface Dec { kind: "Dec" }
 
-let foo = (n: Number) => html`<p>The answer is <b>${n}</b></p>`;
+type Msg = Inc | Dec;
 
-function mounted(root: HTMLElement | null): (_:TemplateResult) => void {
-  if (root === null) {
-    throw new Error("bad root");
+function update(msg: Msg, model: number): number {
+  switch(msg.kind) {
+    case "Inc":
+      return model + 1;
+    case "Dec":
+      return model - 1;
   }
-  return (t) => render(t, root);
 }
 
-let rerender = mounted(document.getElementById("root"));
+let view = (s: number) => html`<p>
+  The answer is <b>${s}</b>
+  <button on-click=${() => act({ kind: "Inc" }) }>inc</button>
+  <button on-click=${() => act({ kind: "Dec" }) }>Dec</button>
+</p>`;
 
-rerender(foo(42));
-for(let i=0; i<100; i++) {
-  setTimeout(() => rerender(foo(42+i)), 1000 * i);
+let main: Program<Msg, number> = {
+  model: 0,
+  update: update,
+  view: view,
 }
+
+let act = run(main, document.getElementById("root"));
