@@ -1,4 +1,4 @@
-import {TemplateResult, TemplateInstance, TemplatePart, Part, getValue} from 'lit-html';
+import {TemplateResult, TemplateInstance, TemplatePart, Template, Part, getValue, defaultTemplateFactory} from 'lit-html';
 import {render, extendedPartCallback} from 'lit-html/lib/lit-extended';
 
 export interface Program<Msg, Model> {
@@ -7,16 +7,32 @@ export interface Program<Msg, Model> {
   view: (model: Model) => TeaTemplateResult<Msg>;
 }
 
+interface TeaTemplate<Msg> {
+  __teaUpdate: (msg: Msg) => void | undefined;
+}
+
 export function run<Msg, Model>(program: Program<Msg, Model>, mnt: HTMLElement | null): (m: Msg) => void {
   if (mnt === null) {
     throw new Error("bad mount element");
   }
-  let u = (msg: Msg) => {
+
+  let update = (msg: Msg) => {
+    console.log("calling tea update", msg);
     program.model = program.update(msg, program.model);
-    render(program.view(program.model), mnt);
+    draw();
   }
-  render(program.view(program.model), mnt);
-  return u;
+
+  let draw = () => {
+    let template = program.view(program.model);
+    render(template, mnt, (result): Template => {
+      let t = defaultTemplateFactory(result);
+      (t as any as TeaTemplate<Msg>).__teaUpdate = update; 
+      return t;
+    });
+  };
+
+  draw();
+  return update;
 }
 
 export type Value<Msg> = string | number | TeaTemplateResult<Msg> | Msg;
@@ -25,7 +41,7 @@ export class TeaTemplateResult<Msg> extends TemplateResult {
 }
 
 export function html<Msg>(strings: TemplateStringsArray, ...values: Value<Msg>[]): TeaTemplateResult<Msg> {
-    return new TemplateResult(strings, values, 'html', teaExtendedPartCallback);
+    return new TeaTemplateResult<Msg>(strings, values, 'html', teaExtendedPartCallback);
 }
 
 export const teaExtendedPartCallback =
@@ -40,12 +56,12 @@ export const teaExtendedPartCallback =
           return extendedPartCallback(instance, templatePart, node);
         };
 
-export class EventPart implements Part {
+export class EventPart<Msg> implements Part {
   instance: TemplateInstance;
   element: Element;
   eventName: string;
   private _listener: any;
-  private _previousMsg: any;
+  private _previousMsg: Msg | undefined;
 
   constructor(instance: TemplateInstance, element: Element, eventName: string) {
     this.instance = instance;
@@ -61,7 +77,14 @@ export class EventPart implements Part {
     }
 
     const previousListener = this._listener;
-    const listener = () => { console.log("will send", msg, this.instance); };
+    const listener = () => {
+      let u = (this.instance.template as any as TeaTemplate<Msg>);
+      if (u.__teaUpdate !== undefined) {
+        u.__teaUpdate(msg);
+      } else {
+        throw new Error("template has no registered TEA updater");
+      }
+    };
     this._listener = listener;
 
     if (previousListener != null) {
