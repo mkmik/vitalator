@@ -1,4 +1,4 @@
-import {Program, run, html} from './tea';
+import {Program, run, htmlForMessage} from './tea';
 
 interface Inc { kind: "Inc" }
 interface Dec { kind: "Dec" }
@@ -18,6 +18,8 @@ function update(msg: Msg, model: number): number {
   throw new Error(`this cannot happen ${msg}`);
 };
 
+const html = htmlForMessage<Msg>();
+
 let inner = html`<button on-click=${ { kind: "Foo" }}>foo</button>`;
 let banner = html`<em>${inner}</em>`;
 let txt = "answer";
@@ -26,7 +28,6 @@ let view = (s: number) => html`<p>
   The ${txt} is <b>${s}</b>
   <button on-click=${ { kind: "Inc" } }>inc</button>
   <button on-click=${ { kind: "Dec" } }>dec</button>
-  <button on-click=${ { kind: "Foo" } }>dec</button>
   ${banner}
 </p>`;
 

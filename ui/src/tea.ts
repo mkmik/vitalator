@@ -40,6 +40,10 @@ export type Value<Msg> = string | number | TeaTemplateResult<Msg> | Msg;
 export class TeaTemplateResult<Msg> extends TemplateResult {
 }
 
+export function htmlForMessage<Msg>(): (strings: TemplateStringsArray, ...values: Value<Msg>[]) => TemplateResult {
+  return html;
+}
+
 export function html<Msg>(strings: TemplateStringsArray, ...values: Value<Msg>[]): TeaTemplateResult<Msg> {
     return new TeaTemplateResult<Msg>(strings, values, 'html', teaExtendedPartCallback);
 }
