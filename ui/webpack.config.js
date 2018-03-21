@@ -1,6 +1,12 @@
+var path = require("path");
+
 module.exports = {
   resolve: {
     extensions: ['.ts', '.tsx', '.js']
+  },
+  output: {
+    path: path.resolve(__dirname, "dist"),
+    publicPath: "/dist/"
   },
   entry: './src/index.ts',
   module: {
