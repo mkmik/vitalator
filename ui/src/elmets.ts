@@ -18,11 +18,21 @@ export interface Program<Msg, Model> {
   /*
    * Compute a new model state upon reception of a message.
    */
-  update: (msg: Msg, model: Model) => (Model | [Model, Cmd<Msg>]);
+  update: (msg: Msg, model: Model) => ModelAndCmd<Model, Msg>;
   /*
    * Draw a model.
    */
   view: (model: Model) => Html<Msg>;
+}
+
+type ModelAndCmd<Model, Msg> = Model | [Model, Cmd<Msg>];
+
+function unwrapModelAndCmd<Model, Msg>(m: ModelAndCmd<Model, Msg>): [Model, Cmd<Msg>] {
+    if (m instanceof Array) {
+      return m;
+    } else {
+      return [m, new None<Msg>()];
+    }
 }
 
 export interface Cmd<Msg> {
@@ -48,14 +58,8 @@ export function run<Msg, Model>(mnt: HTMLElement | null, program: Program<Msg, M
   let model = program.init;
 
   let update = (msg: Msg) => {
-    let cmd = new None<Msg>();
-    let u = program.update(msg, model);
-    if (u instanceof Array) {
-      model = u[0];
-      cmd = u[1];
-    } else {
-      model = u;
-    }
+    let cmd: Cmd<Msg>;
+    [model, cmd] = unwrapModelAndCmd(program.update(msg, model));
     draw();
   }
 
