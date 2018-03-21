@@ -47,7 +47,7 @@ class None<Msg> implements Cmd<Msg> {
 export const none = <Msg>() => new None<Msg>();
 
 interface ElmetsTemplate<Msg> {
-  __elmetsUpdate: (msg: Msg) => void | undefined;
+  __elmetsUpdate: (msg: Msg) => void;
 }
 
 export function run<Msg, Model>(mnt: HTMLElement | null, program: Program<Msg, Model>): (m: Msg) => void {
@@ -118,7 +118,7 @@ export class EventPart<Msg> implements Part {
   element: Element;
   eventName: string;
   private _listener: any;
-  private _previousMsg: Msg | undefined;
+  private _previousMsg?: Msg;
 
   constructor(instance: TemplateInstance, element: Element, eventName: string) {
     this.instance = instance;
@@ -139,6 +139,8 @@ export class EventPart<Msg> implements Part {
       if (u.__elmetsUpdate !== undefined) {
         if (isEventHandler(msg)) {
           msg = msg.eventToMessage(e);
+        } else if (isElementValue(msg)) {
+          msg = {value: (e.target as any).value, ...(msg as any)} as Msg;
         }
         u.__elmetsUpdate(msg as Msg);
       } else {
@@ -159,8 +161,18 @@ export class EventPart<Msg> implements Part {
 /**
  * onInput takes the value of an input element and passes it to a custom message constructor.
  */
-export function onInput<Msg>(cons: (v: string) => Msg): EventHandler<Msg> {
+export function onInput<Msg extends {}>(msg: Msg&ElementValue): EventHandler<Msg> {
   return {
-    eventToMessage: (e: Event) => cons((e.target as HTMLInputElement).value),
+    eventToMessage: (e: Event): Msg => ({value: (e.target as HTMLInputElement).value, ...(msg as any)} as Msg&ElementValue),
   };
+}
+
+const VALUER = Symbol("VALUER");
+export class ElementValue {
+  valuerKind = VALUER
+  value?: string
+}
+
+function isElementValue(object: any): object is ElementValue {
+    return object.valuerKind == VALUER;
 }
