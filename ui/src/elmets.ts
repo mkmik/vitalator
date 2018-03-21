@@ -54,7 +54,12 @@ export function run<Msg, Model>(mnt: HTMLElement | null, program: Program<Msg, M
   return update;
 }
 
-export type Value<Msg> = string | number | Html<Msg> | Msg;
+export interface EventHandler<Msg> {
+  kind: "EventHandler";
+  handle(e: Event): Msg
+}
+
+export type Value<Msg> = string | number | Html<Msg> | Msg | EventHandler<Msg>;
 
 export class Html<Msg> extends TemplateResult {
 }
@@ -97,16 +102,19 @@ export class EventPart<Msg> implements Part {
   }
 
   setValue(value: any): void {
-    const msg = getValue(this, value);
+    let msg = getValue(this, value);
     const previousMsg = this._previousMsg;
     if (msg === previousMsg) {
       return;
     }
 
     const previousListener = this._listener;
-    const listener = () => {
+    const listener = (e: Event) => {
       let u = (this.instance.template as any as ElmetsTemplate<Msg>);
       if (u.__elmetsUpdate !== undefined) {
+        if (msg.kind == "EventHandler") {
+          msg = msg.handle(e);
+        }
         u.__elmetsUpdate(msg);
       } else {
         throw new Error("template has no registered elmets updater");
@@ -121,4 +129,11 @@ export class EventPart<Msg> implements Part {
       this.element.addEventListener(this.eventName, listener);
     }
   }
+}
+
+export function onInput<Msg>(cons: (v: string) => Msg): EventHandler<Msg> {
+  return {
+    kind: "EventHandler",
+    handle: (e: Event) => cons((e.target as HTMLInputElement).value),
+  };
 }
