@@ -9,17 +9,17 @@ interface Rst { kind: "Rst" }
 interface Changed { kind: "Changed", value: string }
 function Changed(v: string): Changed { return { kind: "Changed", value: v }; }
 
-function update(msg: Msg, model: number): [number, Cmd<Msg>] {
+function update(msg: Msg, model: number): number {
   switch(msg.kind) {
     case "Inc":
-      return [model + 1, none()];
+      return model + 1;
     case "Dec":
-      return [model - 1, none()];
+      return model - 1;
     case "Rst":
-      return [0, none()];
+      return 0;
     case "Changed":
       console.log("changed", msg);
-      return [model, none()];
+      return model;
   }
 };
 

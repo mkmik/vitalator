@@ -18,7 +18,7 @@ export interface Program<Msg, Model> {
   /*
    * Compute a new model state upon reception of a message.
    */
-  update: (msg: Msg, model: Model) => [Model, Cmd<Msg>];
+  update: (msg: Msg, model: Model) => (Model | [Model, Cmd<Msg>]);
   /*
    * Draw a model.
    */
@@ -48,8 +48,14 @@ export function run<Msg, Model>(mnt: HTMLElement | null, program: Program<Msg, M
   let model = program.init;
 
   let update = (msg: Msg) => {
-    let cmd: Cmd<Msg>;
-    [model, cmd] = program.update(msg, model);
+    let cmd = new None<Msg>();
+    let u = program.update(msg, model);
+    if (u instanceof Array) {
+      model = u[0];
+      cmd = u[1];
+    } else {
+      model = u;
+    }
     draw();
   }
 
