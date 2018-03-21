@@ -12,5 +12,15 @@ module.exports = {
       }
     ]
   },
+  devServer: {
+    stats: {
+      assets: false,
+      hash: false,
+      chunks: false,
+      errors: true,
+      errorDetails: true,
+    },
+    overlay: true,
+  },
   mode: "development"
 };
