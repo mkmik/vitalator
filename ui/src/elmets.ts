@@ -1,32 +1,51 @@
 import {TemplateResult, TemplateInstance, TemplatePart, Template, Part, getValue, defaultTemplateFactory} from 'lit-html';
 import {render, extendedPartCallback} from 'lit-html/lib/lit-extended';
 
+/**
+ * A program describes how to manage a Elmets app.
+ *
+ * Honestly, it is totally normal if this seems crazy at first.
+ * The best way to understand is to work through guide.elm-lang.org. It makes way more sense in context!
+ *
+ * @param Msg the type of the messages this program will use.
+ * @param Model the type of the state this program holds.
+ */
 export interface Program<Msg, Model> {
-  model: Model;
+  /**
+   * Initial program's state.
+   */
+  init: Model;
+  /*
+   * Compute a new model state upon reception of a message.
+   */
   update: (msg: Msg, model: Model) => Model;
-  view: (model: Model) => TeaTemplateResult<Msg>;
+  /*
+   * Draw a model.
+   */
+  view: (model: Model) => Html<Msg>;
 }
 
-interface TeaTemplate<Msg> {
-  __teaUpdate: (msg: Msg) => void | undefined;
+interface ElmetsTemplate<Msg> {
+  __elmetsUpdate: (msg: Msg) => void | undefined;
 }
 
-export function run<Msg, Model>(program: Program<Msg, Model>, mnt: HTMLElement | null): (m: Msg) => void {
+export function run<Msg, Model>(mnt: HTMLElement | null, program: Program<Msg, Model>): (m: Msg) => void {
   if (mnt === null) {
     throw new Error("bad mount element");
   }
 
+  let model = program.init;
+
   let update = (msg: Msg) => {
-    console.log("calling tea update", msg);
-    program.model = program.update(msg, program.model);
+    model = program.update(msg, model);
     draw();
   }
 
   let draw = () => {
-    let template = program.view(program.model);
+    let template = program.view(model);
     render(template, mnt, (result): Template => {
       let t = defaultTemplateFactory(result);
-      (t as any as TeaTemplate<Msg>).__teaUpdate = update; 
+      (t as any as ElmetsTemplate<Msg>).__elmetsUpdate = update; 
       return t;
     });
   };
@@ -35,20 +54,24 @@ export function run<Msg, Model>(program: Program<Msg, Model>, mnt: HTMLElement |
   return update;
 }
 
-export type Value<Msg> = string | number | TeaTemplateResult<Msg> | Msg;
+export type Value<Msg> = string | number | Html<Msg> | Msg;
 
-export class TeaTemplateResult<Msg> extends TemplateResult {
+export class Html<Msg> extends TemplateResult {
 }
 
 export function htmlForMessage<Msg>(): (strings: TemplateStringsArray, ...values: Value<Msg>[]) => TemplateResult {
   return html;
 }
 
-export function html<Msg>(strings: TemplateStringsArray, ...values: Value<Msg>[]): TeaTemplateResult<Msg> {
-    return new TeaTemplateResult<Msg>(strings, values, 'html', teaExtendedPartCallback);
+/**
+ * html is a tagged template function that builds Html template objects that
+ * emits messages of a given user defined type on events.
+ */
+export function html<Msg>(strings: TemplateStringsArray, ...values: Value<Msg>[]): Html<Msg> {
+    return new Html<Msg>(strings, values, 'html', elmetsExtendedPartCallback);
 }
 
-export const teaExtendedPartCallback =
+export const elmetsExtendedPartCallback =
     (instance: TemplateInstance, templatePart: TemplatePart, node: Node):
         Part => {
           if (templatePart.type === 'attribute') {
@@ -82,11 +105,11 @@ export class EventPart<Msg> implements Part {
 
     const previousListener = this._listener;
     const listener = () => {
-      let u = (this.instance.template as any as TeaTemplate<Msg>);
-      if (u.__teaUpdate !== undefined) {
-        u.__teaUpdate(msg);
+      let u = (this.instance.template as any as ElmetsTemplate<Msg>);
+      if (u.__elmetsUpdate !== undefined) {
+        u.__elmetsUpdate(msg);
       } else {
-        throw new Error("template has no registered TEA updater");
+        throw new Error("template has no registered elmets updater");
       }
     };
     this._listener = listener;

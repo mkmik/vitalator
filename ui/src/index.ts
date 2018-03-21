@@ -1,10 +1,11 @@
-import {Program, run, htmlForMessage} from './tea';
+import {Program, run, htmlForMessage} from './elmets';
+const html = htmlForMessage<Msg>();
+
+type Msg = Inc | Dec | Rst; 
 
 interface Inc { kind: "Inc" }
 interface Dec { kind: "Dec" }
-interface Foo { kind: "Foo" }
-
-type Msg = Inc | Dec | Foo;
+interface Rst { kind: "Rst" }
 
 function update(msg: Msg, model: number): number {
   switch(msg.kind) {
@@ -12,29 +13,25 @@ function update(msg: Msg, model: number): number {
       return model + 1;
     case "Dec":
       return model - 1;
-    case "Foo":
+    case "Rst":
       return 0;
   }
   throw new Error(`this cannot happen ${msg}`);
 };
 
-const html = htmlForMessage<Msg>();
-
-let inner = html`<button on-click=${ { kind: "Foo" }}>foo</button>`;
-let banner = html`<em>${inner}</em>`;
+let inner = html`<button on-click=${ { kind: "Rst" }}>reset</button>`;
+let footer = html`<hr><em>${inner}</em>`;
 let txt = "answer";
 
 let view = (s: number) => html`<p>
   The ${txt} is <b>${s}</b>
   <button on-click=${ { kind: "Inc" } }>inc</button>
   <button on-click=${ { kind: "Dec" } }>dec</button>
-  ${banner}
+  ${footer}
 </p>`;
 
-let main: Program<Msg, number> = {
-  model: 0,
+run(document.getElementById("root"), {
+  init: 0,
   update: update,
   view: view,
-}
-
-run(main, document.getElementById("root"));
+});
