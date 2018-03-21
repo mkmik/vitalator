@@ -33,7 +33,7 @@ let view = (s: number) => html`<p>
   <button on-click=${ { kind: "Dec" } }>dec</button>
   ${footer}
   <hr>
-  <input on-input=${ onInput(Changed) }></input>
+  <input on-change=${ onInput(Changed) }></input>
 </p>`;
 
 run(document.getElementById("root"), {
