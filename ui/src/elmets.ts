@@ -18,12 +18,23 @@ export interface Program<Msg, Model> {
   /*
    * Compute a new model state upon reception of a message.
    */
-  update: (msg: Msg, model: Model) => Model;
+  update: (msg: Msg, model: Model) => [Model, Cmd<Msg>];
   /*
    * Draw a model.
    */
   view: (model: Model) => Html<Msg>;
 }
+
+export interface Cmd<Msg> {
+  perform(f: (msg: Msg) => void): void;
+}
+
+class None<Msg> implements Cmd<Msg> {
+  perform(f: (msg: Msg) => void): void {
+  }
+}
+
+export const none = <Msg>() => new None<Msg>();
 
 interface ElmetsTemplate<Msg> {
   __elmetsUpdate: (msg: Msg) => void | undefined;
@@ -37,7 +48,8 @@ export function run<Msg, Model>(mnt: HTMLElement | null, program: Program<Msg, M
   let model = program.init;
 
   let update = (msg: Msg) => {
-    model = program.update(msg, model);
+    let cmd: Cmd<Msg>;
+    [model, cmd] = program.update(msg, model);
     draw();
   }
 
@@ -134,6 +146,9 @@ export class EventPart<Msg> implements Part {
   }
 }
 
+/**
+ * onInput takes the value of an input element and passes it to a custom message constructor.
+ */
 export function onInput<Msg>(cons: (v: string) => Msg): EventHandler<Msg> {
   return {
     eventToMessage: (e: Event) => cons((e.target as HTMLInputElement).value),
