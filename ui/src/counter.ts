@@ -40,7 +40,7 @@ let inner = html`<button on-click=${ { type: RST } }>reset</button>`;
 let footer = html`<hr><em>${inner}</em>`;
 let txt = "answer";
 
-export const sview = (m: Model): Html<Msg> => html`<p>
+export const view = (m: Model): Html<Msg> => html`<p>
   The ${txt} is <b>${m.n}</b>
   <button on-click=${ { type: INC } }>inc</button>
   <button on-click=${ { type: DEC } }>dec</button>
@@ -50,4 +50,4 @@ export const sview = (m: Model): Html<Msg> => html`<p>
   <p>${m.comment}</p>
 </p>`;
 
-export const view = (m: Model): Html<Msg> => html`<button on-click=${ { type: RST } }>reset</button><div>${inner}</div>`;
+export const sview = (m: Model): Html<Msg> => html`<button on-click=${ { type: RST } }>reset</button><div>${inner}</div>`;

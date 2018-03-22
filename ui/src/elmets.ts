@@ -100,8 +100,6 @@ export class Html<Msg> extends TemplateResult {
   private foo?: Msg; // force the type-checker to distinguish Html objects of different type parameters.
 
   static map<A, Msg>(h: Html<A>, f: (from: A) => Msg): Html<Msg> {
-    console.log("should map recursively from", h);
-
     const patch = (h: Html<A>) => {
       if ((h.partCallback as any).__elmetsExtended === true) {
         h.partCallback = (instance: TemplateInstance, templatePart: TemplatePart, node: Node): Part => {

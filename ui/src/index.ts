@@ -33,14 +33,14 @@ function update(msg: Msg, model: Model): Model {
   throw new Error("unhandled message");
 };
 
-let sview = (m: Model):Html<Msg> => html`
+let view = (m: Model):Html<Msg> => html`
   <button on-click=${ { type: ADD } }>Add counter</button>
   <hr>
   <ul>
   ${m.counters.map(Counter.view).map((h, index) => Html.map<Counter.Msg, Msg>(h, (msg) => ({ type: COUNTER_MSG, pos: index, msg: msg})))}
   </ul>`;
 
-let view = (m: Model): Html<Msg> => html`<p>${Html.map<Counter.Msg, Msg>(Counter.view(m.counters[0]), (msg) => ({ type: COUNTER_MSG, pos: 0, msg: msg}))}</p>`;
+let sview = (m: Model): Html<Msg> => html`<p>${Html.map<Counter.Msg, Msg>(Counter.view(m.counters[0]), (msg) => ({ type: COUNTER_MSG, pos: 0, msg: msg}))}</p>`;
 
 run(document.getElementById("root"), {
   init: init,
