@@ -1,4 +1,4 @@
-import {Program, Cmd, none, run, htmlForMessage, onInput, ElementValue, repeat} from './elmets';
+import {Program, Cmd, none, run, htmlForMessage, Html, onInput, ElementValue, repeat} from './elmets';
 const html = htmlForMessage<Msg>();
 
 const INC = Symbol("INC");
@@ -40,7 +40,7 @@ let inner = html`<button on-click=${ { type: RST } }>reset</button>`;
 let footer = html`<hr><em>${inner}</em>`;
 let txt = "answer";
 
-export let view = (m: Model) => html`<p>
+export let view = (m: Model): Html<Msg> => html`<p>
   The ${txt} is <b>${m.n}</b>
   <button on-click=${ { type: INC } }>inc</button>
   <button on-click=${ { type: DEC } }>dec</button>

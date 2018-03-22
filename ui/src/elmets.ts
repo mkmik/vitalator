@@ -97,6 +97,12 @@ export type Value<Msg> =
   DirectiveFn<Part>;
 
 export class Html<Msg> extends TemplateResult {
+  private foo?: Msg; // force the type-checker to distinguish Html objects of different type parameters.
+
+  static map<A, Msg>(h: Html<A>, f: (from: A) => Msg): Html<Msg> {
+    console.log("TODO");
+    return (htmlForMessage<Msg>())`<p>TODO</p>`;
+  }
 }
 
 export function htmlForMessage<Msg>(): (strings: TemplateStringsArray, ...values: Value<Msg>[]) => TemplateResult {

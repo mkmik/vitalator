@@ -1,4 +1,4 @@
-import {Program, Cmd, none, run, htmlForMessage, onInput, ElementValue, repeat} from './elmets';
+import {Program, Cmd, none, run, htmlForMessage, Html, onInput, ElementValue, repeat} from './elmets';
 import * as Counter from  './counter';
 const html = htmlForMessage<Msg>();
 
@@ -34,11 +34,11 @@ function update(msg: Msg, model: Model): Model {
   throw new Error("unhandled message");
 };
 
-let view = (m: Model) => html`
+let view = (m: Model):Html<Msg> => html`
   <button on-click=${ { type: ADD } }>Add counter</button>
   <hr>
   <ul>
-  ${m.counters.map(Counter.view)}
+  ${m.counters.map(Counter.view).map((h, index) => Html.map<Counter.Msg, Msg>(h, (msg) => ({ type: COUNTER_MSG, pos: index, msg: msg})))}
   </ul>`;
 
 run(document.getElementById("root"), {
