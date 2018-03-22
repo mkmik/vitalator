@@ -15,6 +15,8 @@
     "tsc": "tsc"
   },
   "dependencies": {
+    "@polymer/paper-button": "^3.0.0-pre.11",
+    "@polymer/polymer": "^3.0.0-pre.11",
     "lit-html": "https://drive.google.com/uc?export=download&id=1a1MNPrC_9cwCanj0uPLk5u5vOBcGzWR5"
   }
 }
