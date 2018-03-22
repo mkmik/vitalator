@@ -1,4 +1,3 @@
 # Quickstart
 
-    yarn install
-    yarn start
+    parcel index.html
