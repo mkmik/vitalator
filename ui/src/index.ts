@@ -13,6 +13,7 @@ type Msg = Readonly<
   { kind: typeof CHANGED} & ElementValue>;
 
 function update(msg: Msg, model: number): number {
+  console.log("updating", msg, "(stringified as", JSON.stringify(msg), ")");
   switch(msg.kind) {
     case INC:
       return model + 1;
@@ -21,7 +22,6 @@ function update(msg: Msg, model: number): number {
     case RST:
       return 0;
     case CHANGED:
-      console.log("changed", msg.value);
       return model;
   }
 };
