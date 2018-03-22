@@ -12,18 +12,27 @@ type Msg = Readonly<
   { type: typeof RST } |
   { type: typeof CHANGED} & ElementValue>;
 
-function update(msg: Msg, model: number): number {
+interface Model {
+  n: number;
+  comment: string;
+}
+
+const init: Model = {
+  n: 0,
+  comment: ""
+}
+
+function update(msg: Msg, model: Model): Model {
   console.log("updating", msg, "(stringified as", JSON.stringify(msg), ")");
   switch(msg.type) {
     case INC:
-      return model + 1;
+      return {...model, n: model.n + 1};
     case DEC:
-      return model - 1;
+      return {...model, n: model.n - 1};
     case RST:
-      return 0;
+      return init;
     case CHANGED:
-      console.log("todo something with entered text", msg.value);
-      return model;
+      return {...model, comment: msg.value || ""};
   }
 };
 
@@ -31,17 +40,18 @@ let inner = html`<button on-click=${ { type: RST }}>reset</button>`;
 let footer = html`<hr><em>${inner}</em>`;
 let txt = "answer";
 
-let view = (s: number) => html`<p>
-  The ${txt} is <b>${s}</b>
+let view = (m: Model) => html`<p>
+  The ${txt} is <b>${m.n}</b>
   <button on-click=${ { type: INC } }>inc</button>
   <button on-click=${ { type: DEC } }>dec</button>
   ${footer}
   <hr>
-  <input on-change=${ { type: CHANGED, ...new ElementValue()} }></input>
+  <input on-input=${ { type: CHANGED, ...new ElementValue()} }></input>
+  <p>${m.comment}</p>
 </p>`;
 
 run(document.getElementById("root"), {
-  init: 0,
+  init: init,
   update: update,
   view: view,
 });

@@ -163,7 +163,7 @@ export class EventPart<Msg> implements Part {
  */
 export function onInput<Msg extends {}>(msg: Msg&ElementValue): EventHandler<Msg> {
   return {
-    eventToMessage: (e: Event): Msg => ({value: (e.target as HTMLInputElement).value, ...(msg as any)} as Msg&ElementValue),
+    eventToMessage: (e: Event): Msg => ({...(msg as any), value: (e.target as HTMLInputElement).value} as Msg&ElementValue),
   };
 }
 
