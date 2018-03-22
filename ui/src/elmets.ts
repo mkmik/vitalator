@@ -1,5 +1,6 @@
-import {TemplateResult, TemplateInstance, TemplatePart, Template, Part, getValue, defaultTemplateFactory} from 'lit-html';
+import {TemplateResult, TemplateInstance, DirectiveFn, TemplatePart, Template, Part, getValue, defaultTemplateFactory} from 'lit-html';
 import {render, extendedPartCallback} from 'lit-html/lib/lit-extended';
+export {repeat} from 'lit-html/lib/repeat';
 
 /**
  * A program describes how to manage a Elmets app.
@@ -84,7 +85,16 @@ function isEventHandler<Msg>(object: any): object is EventHandler<Msg> {
     return 'eventToMessage' in object;
 }
 
-export type Value<Msg> = string | number | Html<Msg> | Msg | EventHandler<Msg>;
+export type Value<Msg> = 
+  string |
+  string[] |
+  number |
+  number[] |
+  Html<Msg> |
+  Html<Msg>[] |
+  Msg |
+  EventHandler<Msg> |
+  DirectiveFn<Part>;
 
 export class Html<Msg> extends TemplateResult {
 }
