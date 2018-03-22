@@ -53,17 +53,17 @@ const actions = html`
 `;
 
 export const view = (m: Model): Html<Msg> => html`
-  <paper-card>
-  <div class="card-content">
-    The ${txt} is <b>${m.n}</b>
-    <paper-input label="comment" on-input=${ { type: CHANGED, ...new ElementValue()} }></paper-input>
-    <p>${m.comment}</p>
-  </div>
-  <div class="card-actions">
-    <div class="horizontal justified">
-      ${actions}
+  <paper-card class="counter">
+    <div class="card-content">
+      The ${txt} is <b>${m.n}</b>
+      <paper-input label="comment" on-input=${ { type: CHANGED, ...new ElementValue()} }></paper-input>
+      <p>${m.comment}</p>
     </div>
-  </div>
-</paper-card>`;
+    <div class="card-actions">
+      <div class="horizontal justified">
+        ${actions}
+      </div>
+    </div>
+  </paper-card>`;
 
 export const sview = (m: Model): Html<Msg> => html`<button on-click=${ { type: RST } }>reset</button><div>${inner}</div>`;
