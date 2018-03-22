@@ -1,5 +1,10 @@
 import {Program, Cmd, none, run, htmlForMessage, Html, onInput, ElementValue, repeat} from './elmets';
+import "@polymer/paper-button/paper-button.js";
+import "@polymer/paper-input/paper-input.js";
+import "@polymer/paper-card/paper-card.js";
+
 const html = htmlForMessage<Msg>();
+
 
 const INC = Symbol("INC");
 const DEC = Symbol("DEC");
@@ -36,18 +41,29 @@ export function update(msg: Msg, model: Model): Model {
   }
 };
 
-let inner = html`<button on-click=${ { type: RST } }>reset</button>`;
-let footer = html`<hr><em>${inner}</em>`;
+let inner = html`<paper-button raised on-click=${ { type: RST } }>reset</paper-button>`;
+
+let reset = html`${inner}`;
 let txt = "answer";
 
-export const view = (m: Model): Html<Msg> => html`<p>
-  The ${txt} is <b>${m.n}</b>
-  <button on-click=${ { type: INC } }>inc</button>
-  <button on-click=${ { type: DEC } }>dec</button>
-  ${footer}
-  <hr>
-  <input on-input=${ { type: CHANGED, ...new ElementValue()} }></input>
-  <p>${m.comment}</p>
-</p>`;
+const actions = html`
+  <paper-button raised on-click=${ { type: INC } }>inc</paper-button>
+  <paper-button raised on-click=${ { type: DEC } }>dec</paper-button>
+  ${reset}
+`;
+
+export const view = (m: Model): Html<Msg> => html`
+  <paper-card>
+  <div class="card-content">
+    The ${txt} is <b>${m.n}</b>
+    <paper-input label="comment" on-input=${ { type: CHANGED, ...new ElementValue()} }></paper-input>
+    <p>${m.comment}</p>
+  </div>
+  <div class="card-actions">
+    <div class="horizontal justified">
+      ${actions}
+    </div>
+  </div>
+</paper-card>`;
 
 export const sview = (m: Model): Html<Msg> => html`<button on-click=${ { type: RST } }>reset</button><div>${inner}</div>`;
