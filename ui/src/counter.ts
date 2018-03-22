@@ -23,7 +23,7 @@ export const init: Model = {
 }
 
 export function update(msg: Msg, model: Model): Model {
-  console.log("updating", msg, "(stringified as", JSON.stringify(msg), ")");
+  console.log("Counter.update", msg, "(stringified as", JSON.stringify(msg), ")");
   switch(msg.type) {
     case INC:
       return {...model, n: model.n + 1};
@@ -40,7 +40,7 @@ let inner = html`<button on-click=${ { type: RST } }>reset</button>`;
 let footer = html`<hr><em>${inner}</em>`;
 let txt = "answer";
 
-export let view = (m: Model): Html<Msg> => html`<p>
+export const sview = (m: Model): Html<Msg> => html`<p>
   The ${txt} is <b>${m.n}</b>
   <button on-click=${ { type: INC } }>inc</button>
   <button on-click=${ { type: DEC } }>dec</button>
@@ -50,3 +50,4 @@ export let view = (m: Model): Html<Msg> => html`<p>
   <p>${m.comment}</p>
 </p>`;
 
+export const view = (m: Model): Html<Msg> => html`<button on-click=${ { type: RST } }>reset</button><div>${inner}</div>`;

@@ -100,8 +100,26 @@ export class Html<Msg> extends TemplateResult {
   private foo?: Msg; // force the type-checker to distinguish Html objects of different type parameters.
 
   static map<A, Msg>(h: Html<A>, f: (from: A) => Msg): Html<Msg> {
-    console.log("TODO");
-    return (htmlForMessage<Msg>())`<p>TODO</p>`;
+    console.log("should map recursively from", h);
+
+    const patch = (h: Html<A>) => {
+      if ((h.partCallback as any).__elmetsExtended === true) {
+        h.partCallback = (instance: TemplateInstance, templatePart: TemplatePart, node: Node): Part => {
+          return elmetsExtendedPartCallback(instance, templatePart, node, f);
+        };
+        (h.partCallback as any).__elmetsExtended = true;
+      }
+
+      for (let v of h.values) {
+        if (v instanceof Html) {
+          patch(v);
+        }
+      }
+    };
+
+    patch(h);
+
+    return h as any as Html<Msg>;
   }
 }
 
@@ -118,28 +136,36 @@ export function html<Msg>(strings: TemplateStringsArray, ...values: Value<Msg>[]
 }
 
 export const elmetsExtendedPartCallback =
-    (instance: TemplateInstance, templatePart: TemplatePart, node: Node):
+    <Msg>(instance: TemplateInstance, templatePart: TemplatePart, node: Node,
+      messageMapper: MessageMapper<any, Msg> = (msg: any) => (msg as Msg)):
         Part => {
           if (templatePart.type === 'attribute') {
             if (templatePart.rawName!.startsWith('on-')) {
               const eventName = templatePart.rawName!.slice(3);
-              return new EventPart(instance, node as Element, eventName);
+              return new EventPart(instance, node as Element, eventName, messageMapper);
             }
           }
           return extendedPartCallback(instance, templatePart, node);
         };
 
+// TODO(mkm): use hybrid types.
+(elmetsExtendedPartCallback as any).__elmetsExtended = true;
+
+type MessageMapper<A, Msg> = (msg: A) => Msg;
+
 export class EventPart<Msg> implements Part {
   instance: TemplateInstance;
   element: Element;
   eventName: string;
+  messageMapper: MessageMapper<any, Msg>;
   private _listener: any;
   private _previousMsg?: Msg;
 
-  constructor(instance: TemplateInstance, element: Element, eventName: string) {
+  constructor(instance: TemplateInstance, element: Element, eventName: string, messageMapper: MessageMapper<any, Msg>) {
     this.instance = instance;
     this.element = element;
     this.eventName = eventName;
+    this.messageMapper = messageMapper; 
   }
 
   setValue(value: any): void {
@@ -158,7 +184,7 @@ export class EventPart<Msg> implements Part {
         } else if (isElementValue(msg)) {
           msg = {value: (e.target as any).value, ...(msg as any)} as Msg;
         }
-        u.__elmetsUpdate(msg as Msg);
+        u.__elmetsUpdate(this.messageMapper(msg));
       } else {
         throw new Error("template has no registered elmets updater");
       }
