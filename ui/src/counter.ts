@@ -9,22 +9,26 @@ const html = htmlForMessage<Msg>();
 const INC = Symbol("INC");
 const DEC = Symbol("DEC");
 const RST = Symbol("RST");
+const DEL = Symbol("DEL");
 const CHANGED = Symbol("CHANGED");
 
 export type Msg = Readonly< 
   { type: typeof INC } |
   { type: typeof DEC } |
   { type: typeof RST } |
+  { type: typeof DEL } |
   { type: typeof CHANGED} & ElementValue>;
 
 export interface Model {
   n: number;
   comment: string;
+  dead: boolean;
 }
 
 export const init: Model = {
   n: 0,
   comment: "",
+  dead: false,
 }
 
 export function update(msg: Msg, model: Model): Model {
@@ -36,12 +40,18 @@ export function update(msg: Msg, model: Model): Model {
       return {...model, n: model.n - 1};
     case RST:
       return init;
+    case DEL:
+      return {...model, dead: true };
     case CHANGED:
       return {...model, comment: msg.value || ""};
   }
+  throw new Error(`unhandled message ${((a: never) => a)(msg)}`);
 };
 
-let inner = html`<paper-button raised on-click=${ { type: RST } }>reset</paper-button>`;
+let inner = html`
+  <paper-button raised on-click=${ { type: RST } }>reset</paper-button>
+  <paper-button raised on-click=${ { type: DEL } }>delete</paper-button>
+`;
 
 let reset = html`${inner}`;
 let txt = "answer";

@@ -10,7 +10,7 @@ const ADD = Symbol("ADD");
 const COUNTER_MSG = Symbol("COUNTER_MSG");
 
 type Msg = Readonly< 
-  { type: typeof ADD }|
+  { type: typeof ADD } |
   { type: typeof COUNTER_MSG, msg: Counter.Msg, pos: number }>
 
 interface Model {
@@ -27,14 +27,17 @@ function update(msg: Msg, model: Model): Model {
     case ADD:
       return {...model, counters: [...model.counters, Counter.init]};
     case COUNTER_MSG:
-      return {...model, counters: model.counters.map( (item, index) => {
-        if (index !== msg.pos) {
-          return item;
+      return {...model, counters: model.counters.reduce( (acc, item, index) => {
+        if (index == msg.pos) {
+          item = Counter.update(msg.msg, item);
         }
-        return Counter.update(msg.msg, item);
-      })};
+        if (!item.dead) {
+          acc.push(item);
+        }
+        return acc;
+      }, [] as Counter.Model[])};
   }
-  throw new Error("unhandled message");
+  throw new Error(`unhandled message ${((a: never) => a)(msg)}`);
 };
 
 let view = (m: Model):Html<Msg> => html`
