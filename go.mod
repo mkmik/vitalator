@@ -1,1 +1,1 @@
-module "github.com/bitnami-labs/vitalator"
+module github.com/bitnami-labs/vitalator
